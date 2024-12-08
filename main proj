@@ -1,0 +1,65 @@
+use std::error::Error;
+use std::fs::File;
+use std::path::Path;
+mod main_environment{
+    use std::error::Error;
+    use std::fs::File;
+    use std::path::Path;
+
+
+
+    pub fn read_csv_to_vector(file_path: &str) -> Result<Vec<Vec<String>>, Box<dyn Error>> {
+        let file = File::open(Path::new(file_path))?;
+        let mut reader = csv::Reader::from_reader(file);
+        let mut rows: Vec<Vec<String>> = Vec::new();
+        for result in reader.records() {
+            let record = result?; // Each record is a CSV row
+            rows.push(record.iter().map(|s| s.to_string()).collect());
+        }
+        Ok(rows)
+    
+    }
+
+    pub fn filter_by_countries(
+    data: &[Vec<String>],
+    countries: &[&str],
+    ) -> Vec<Vec<String>> {
+        let mut filtered_rows: Vec<Vec<String>> = Vec::new();
+        for row in data {
+            if let Some(second_entry) = row.get(1) { // Check if the second entry exists
+                if countries.contains(&second_entry.as_str()) { // Match with the target countries
+                     filtered_rows.push(row.clone()); // Add to the filtered list
+                }
+            }
+        }
+            filtered_rows
+    }
+
+
+}
+
+fn main() {
+    let file_path = "SYB67_327_202411_International Migrants and Refugees.csv";
+    use main_environment::read_csv_to_vector;
+    use main_environment::filter_by_countries;
+    match read_csv_to_vector(file_path) {
+        Ok(rows) => {
+            // Define the target countries
+            let target_countries = [
+                "Russian Federation",
+                "Ukraine",
+                "Syrian Arab Republic",
+                "Venezuela",
+                "Yemen",
+            ];
+
+            let filtered_rows = filter_by_countries(&rows, &target_countries);
+            println!("Filtered Rows:");
+            for row in filtered_rows {
+                println!("{:?}", row);
+            }
+        }
+        Err(e) => eprintln!("Error reading CSV: {}", e),
+    }
+  
+}
