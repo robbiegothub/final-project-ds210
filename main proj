@@ -1,4 +1,3 @@
-
 use std::error::Error;
 use std::fs::File;
 use std::path::Path;
@@ -85,7 +84,93 @@ mod main_environment{
             })
             .collect()
         }
+
+    
 }
+
+#[cfg(test)]
+    mod tests {
+        use super::*;
+
+    #[test]
+        fn test_comparing_immigration_numbers () {
+            let file_path = "SYB67_327_202411_International Migrants and Refugees.csv";
+            use crate::main_environment::read_csv_to_vector;
+            use crate::main_environment::filter_by_country;
+            use crate::main_environment::comparing_immigration_numbers;
+            use crate::main_environment::filter_by_countries;
+            match read_csv_to_vector(file_path) {
+                Ok(rows) => {
+                    let target_countries = [
+                        "Russian Federation",
+                        "Ukraine",
+                        "Syrian Arab Republic",
+                        "Venezuela",
+                        "Yemen",
+                        "United States of America",
+                        "Türkiye",
+                        "Saudi Arabia",
+                        "China",
+                        "Australia",
+                        
+                    ];
+                    let filtered_rows = filter_by_countries(&rows, &target_countries);
+                    let filtered_row_russia = filter_by_country(&rows, "Russian Federation");
+                    let filtered_row_ukraine = filter_by_country(&rows, "Ukraine");
+                    let filtered_row_syria = filter_by_country(&rows, "Syrian Arab Republic");
+                    let filtered_row_venezuela = filter_by_country(&rows, "Venezuela (Boliv. Rep. of)");
+                    let filtered_row_yemen = filter_by_country(&rows, "Yemen");
+                    let filtered_row_us = filter_by_country(&rows,"United States of America");
+                    let filtered_row_turkey = filter_by_country(&rows,"Türkiye");
+                    let filtered_row_saudi = filter_by_country(&rows,"Saudi Arabia");
+                    let filtered_row_china = filter_by_country(&rows,"China");
+                    let filtered_row_aus = filter_by_country(&rows,"Australia");
+                    let test_filtered_vecs = vec![
+                            ("Russian Federation".to_string(),filtered_row_russia),
+                            ("Ukraine".to_string(),filtered_row_ukraine),
+                            ("Syrian Arab Republic".to_string(),filtered_row_syria),
+                            ("Venezuela".to_string(),filtered_row_venezuela),
+                            ("Yemen".to_string(),filtered_row_yemen),
+                            ("United States of America".to_string(),filtered_row_us),
+                            ("Türkiye".to_string(),filtered_row_turkey),
+                            ("Saudi Arabia".to_string(),filtered_row_saudi),
+                            ("China".to_string(),filtered_row_china),
+                            ("Australia".to_string(),filtered_row_aus),
+                            
+                        ];
+        
+                    let years = [
+                        "2005->2010",
+                        "2010->2015",
+                        "2015->2020",
+                    ];
+                    let testcomparisons = comparing_immigration_numbers(test_filtered_vecs, &years);
+        
+                    for (country_name, country_comparisons) in testcomparisons {
+                        for (num1, num2, _, _, _) in country_comparisons {
+                        
+                            assert!(
+                                num1 > 0,
+                                "Found non-positive num1 in {}: {}",
+                                country_name,
+                                num1
+                        );
+                            assert!(
+                                num2 > 0,
+                                "Found non-positive num2 in {}: {}",
+                                country_name,
+                                num2
+                            );
+                        }
+                    }
+                }
+                Err(e) => eprintln!("Error reading CSV: {}", e),
+                }
+            
+            
+           
+    }
+    }
 fn main() {
     let file_path = "SYB67_327_202411_International Migrants and Refugees.csv";
     use main_environment::read_csv_to_vector;
@@ -150,6 +235,7 @@ fn main() {
            
         }
         Err(e) => eprintln!("Error reading CSV: {}", e),
+
     }
 }
 
