@@ -1,3 +1,4 @@
+
 use std::error::Error;
 use std::fs::File;
 use std::path::Path;
@@ -54,7 +55,7 @@ mod main_environment{
     pub fn comparing_immigration_numbers(
         filtered_rows: Vec<(String, Vec<Vec<String>>)>, 
         years: &[&str],                               
-    ) -> Vec<(String, Vec<(i64, i64, i64, String)>)> {
+    ) -> Vec<(String, Vec<(i64, i64, i64,f64, String)>)> {
         filtered_rows
             .into_iter()
             .map(|(country_name, rows)| {
@@ -68,11 +69,12 @@ mod main_environment{
     
                             
                             if let (Ok(num1), Ok(num2)) = (value1.parse::<i64>(), value2.parse::<i64>()) {
-                               
+                                let percentage_diff = ((num2 as f64 - num1 as f64) / num1 as f64) * 100.0;
+                                let percentage_diff_rounded = (percentage_diff * 100.0).round() / 100.0;
                                 let year_range = years.get(i).unwrap_or(&"Unknown Range").to_string();
     
                               
-                                return Some((num1, num2, num2 - num1, year_range));
+                                return Some((num1, num2, num2 - num1,percentage_diff_rounded, year_range));
                             }
                         }
                         None
@@ -109,7 +111,7 @@ fn main() {
             let filtered_row_russia = filter_by_country(&rows, "Russian Federation");
             let filtered_row_ukraine = filter_by_country(&rows, "Ukraine");
             let filtered_row_syria = filter_by_country(&rows, "Syrian Arab Republic");
-            let filtered_row_venezuela = filter_by_country(&rows, "Venezuela");
+            let filtered_row_venezuela = filter_by_country(&rows, "Venezuela (Boliv. Rep. of)");
             let filtered_row_yemen = filter_by_country(&rows, "Yemen");
             let filtered_row_us = filter_by_country(&rows,"United States of America");
             let filtered_row_turkey = filter_by_country(&rows,"Türkiye");
@@ -138,8 +140,8 @@ fn main() {
             let comparisons = comparing_immigration_numbers(filtered_vecs, &years);
             for (country_name, country_comparisons) in comparisons {
                 println!("{}", country_name);
-                for (num1, num2, difference, year_range) in country_comparisons {
-                    println!("{} -> {} (Difference: {}) \"{}\"", num1, num2, difference, year_range);
+                for (num1, num2, difference, percentage_diff_rounded, year_range) in country_comparisons {
+                    println!("{} -> {} (Difference: {}({}%)) \"{}\"", num1, num2, difference,percentage_diff_rounded, year_range);
                 }
                 println!();
             }
