@@ -1,3 +1,4 @@
+
 use std::error::Error;
 use std::fs::File;
 use std::path::Path;
@@ -170,6 +171,51 @@ mod main_environment{
             
            
     }
+
+    #[test]
+fn test_filtered_rows_not_empty() {
+    let file_path = "SYB67_327_202411_International Migrants and Refugees.csv";
+    use crate::main_environment::read_csv_to_vector;
+    use crate::main_environment::filter_by_country;
+
+    match read_csv_to_vector(file_path) {
+        Ok(rows) => {
+            let filtered_row_russia = filter_by_country(&rows, "Russian Federation");
+            let filtered_row_ukraine = filter_by_country(&rows, "Ukraine");
+            let filtered_row_syria = filter_by_country(&rows, "Syrian Arab Republic");
+            let filtered_row_venezuela = filter_by_country(&rows, "Venezuela (Boliv. Rep. of)");
+            let filtered_row_yemen = filter_by_country(&rows, "Yemen");
+            let filtered_row_us = filter_by_country(&rows, "United States of America");
+            let filtered_row_turkey = filter_by_country(&rows, "Türkiye");
+            let filtered_row_saudi = filter_by_country(&rows, "Saudi Arabia");
+            let filtered_row_china = filter_by_country(&rows, "China");
+            let filtered_row_aus = filter_by_country(&rows, "Australia");
+
+            let filtered_rows = vec![
+                ("Russian Federation", filtered_row_russia),
+                ("Ukraine", filtered_row_ukraine),
+                ("Syrian Arab Republic", filtered_row_syria),
+                ("Venezuela", filtered_row_venezuela),
+                ("Yemen", filtered_row_yemen),
+                ("United States of America", filtered_row_us),
+                ("Türkiye", filtered_row_turkey),
+                ("Saudi Arabia", filtered_row_saudi),
+                ("China", filtered_row_china),
+                ("Australia", filtered_row_aus),
+            ];
+
+            for (country_name, filtered_row) in filtered_rows {
+                assert!(
+                    !filtered_row.is_empty(),
+                    "Filtered rows for {} are empty!",
+                    country_name
+                );
+            }
+        }
+        Err(e) => eprintln!("Error reading CSV: {}", e),
+    }
+}
+
     }
 fn main() {
     let file_path = "SYB67_327_202411_International Migrants and Refugees.csv";
@@ -235,6 +281,11 @@ fn main() {
            
         }
         Err(e) => eprintln!("Error reading CSV: {}", e),
+
+    }
+}
+
+
 
     }
 }
